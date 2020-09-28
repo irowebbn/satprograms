@@ -1,6 +1,8 @@
 # Uses CNF input as described here: 
 # http://www.satcompetition.org/2011/format-benchmarks2011.html
 
+import copy
+
 def get_assignment(symbol, assignments):
     value = assignments[abs(symbol)-1]
     if (symbol > 0 and value == True) or (symbol < 0 and value == False):
@@ -18,22 +20,23 @@ def set_assignment(value, symbol, assignments):
         assignments[symbol-1] = value
         return
 
-# TODO: Make clauses immutable for a given branch
 def reduce(assignments, clauses):
+    reduced_clauses = copy.deepcopy(clauses)
     for i, clause in enumerate(clauses):
         if clause != [True]:
             for symbol in clause:
                 # Check if symbols in clause have been assigned values
                 value = get_assignment(symbol, assignments)
                 if value != None:
-                    print("Replacing variable " + str(symbol) + " with value " + str(value))
+                    #print("Replacing variable " + str(symbol) + " with value " + str(value))
                     # If the symbol is True, we can set the whole clause to true
                     if value == True:
-                        clauses[i] = [True]
+                        reduced_clauses[i] = [True]
                         break
                     # If the symbol is False, then we can drop it from the clause
                     if value == False:
-                        clauses[i].remove(symbol)
+                        reduced_clauses[i].remove(symbol)
+    return reduced_clauses
 
 def find_pure_symbols(symbols, assignments, clauses):
     pure_symbols = []
@@ -72,31 +75,33 @@ def find_unit_clauses(symbols, assignments, clauses):
             unit_clause_symbols.append(clause[0])
     return unit_clause_symbols
 
-def dpll(symbols, assignments, clauses):
-    reduce(assignments, clauses)
+def dpll(symbols, assignments, clauses, recursion_depth):
+    print("Rd: " + str(recursion_depth))
     print(assignments)
     print(clauses)
+    updated_assignments = copy.deepcopy(assignments)
     # Check if all clauses are already true
     if all([clause == [True] for clause in  clauses]):
         return True
     if any([clause == [] for clause in clauses]):
-        print("Abandoning branch")
+        #print("Abandoning branch")
         return False
-    pure_symbols = find_pure_symbols(symbols, assignments, clauses)
+    pure_symbols = find_pure_symbols(symbols, updated_assignments, clauses)
     if len(pure_symbols) > 0:
-        print("Pure literal found: " + str(pure_symbols))
-        reduce(assignments, clauses)
-        return dpll(symbols, assignments, clauses)
-    unit_clauses = find_unit_clauses(symbols, assignments, clauses)
+        #print("Pure literal found: " + str(pure_symbols))
+        reduced_clauses = reduce(updated_assignments, clauses)
+        return dpll(symbols, updated_assignments, reduced_clauses, recursion_depth+1)
+    unit_clauses = find_unit_clauses(symbols, updated_assignments, clauses)
     if len(unit_clauses) > 0:
-        print("Unit clause found: " + str(unit_clauses))
-        reduce(assignments, clauses)
-        return dpll(symbols, assignments, clauses)
-    guess_symbol = next(symbol for symbol in symbols if get_assignment(symbol, assignments) == None)
-    guess_true = assignments[0:guess_symbol-1] + [True] + assignments[guess_symbol:]
-    guess_false = assignments[0:guess_symbol-1] + [False] + assignments[guess_symbol:] 
+        #print("Unit clause found: " + str(unit_clauses))
+        reduced_clauses = reduce(updated_assignments, clauses)
+        return dpll(symbols, updated_assignments, reduced_clauses, recursion_depth+1)
+    guess_symbol = next(symbol for symbol in symbols if get_assignment(symbol, updated_assignments) == None)
+    guess_true = updated_assignments[0:guess_symbol-1] + [True] + updated_assignments[guess_symbol:]
+    guess_false = updated_assignments[0:guess_symbol-1] + [False] + updated_assignments[guess_symbol:] 
 
-    return dpll(symbols, guess_true, clauses) or dpll(symbols, guess_false, clauses)
+    return dpll(symbols, guess_true, reduce(guess_true, clauses), recursion_depth+1) \
+        or dpll(symbols, guess_false, reduce(guess_false, clauses), recursion_depth+1)
 
 
 user_input = input()
@@ -116,10 +121,7 @@ for i in range(nbclauses):
     user_input = input() 
     clauses[i] = [int(i) for i in user_input.split()[:-1]]
 
-if(dpll(symbols, assignments, clauses)):
+if(dpll(symbols, assignments, clauses, 0)):
     print("SATISFIABLE")
 else:
     print("UNSATISFIABLE")
-
-    
-
