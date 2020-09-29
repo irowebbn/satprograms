@@ -2,6 +2,7 @@
 # http://www.satcompetition.org/2011/format-benchmarks2011.html
 
 import copy
+import math
 
 def get_assignment(symbol, assignments):
     value = assignments[abs(symbol)-1]
@@ -28,7 +29,6 @@ def reduce(assignments, clauses):
                 # Check if symbols in clause have been assigned values
                 value = get_assignment(symbol, assignments)
                 if value != None:
-                    #print("Replacing variable " + str(symbol) + " with value " + str(value))
                     # If the symbol is True, we can set the whole clause to true
                     if value == True:
                         reduced_clauses[i] = [True]
@@ -63,7 +63,7 @@ def find_pure_symbols(symbols, assignments, clauses):
                     break
         if seen_positive ^ seen_negative:
             pure_symbols.append(symbol)
-            set_assignment(True, symbol, assignments)
+            set_assignment(True, int(math.pow(-1, seen_negative)*symbol), assignments)
     return pure_symbols  
 
 
@@ -76,30 +76,23 @@ def find_unit_clauses(symbols, assignments, clauses):
     return unit_clause_symbols
 
 def dpll(symbols, assignments, clauses, recursion_depth):
-    print("Rd: " + str(recursion_depth))
-    print(assignments)
-    print(clauses)
     updated_assignments = copy.deepcopy(assignments)
     # Check if all clauses are already true
     if all([clause == [True] for clause in  clauses]):
         return True
     if any([clause == [] for clause in clauses]):
-        #print("Abandoning branch")
         return False
     pure_symbols = find_pure_symbols(symbols, updated_assignments, clauses)
     if len(pure_symbols) > 0:
-        #print("Pure literal found: " + str(pure_symbols))
         reduced_clauses = reduce(updated_assignments, clauses)
         return dpll(symbols, updated_assignments, reduced_clauses, recursion_depth+1)
     unit_clauses = find_unit_clauses(symbols, updated_assignments, clauses)
     if len(unit_clauses) > 0:
-        #print("Unit clause found: " + str(unit_clauses))
         reduced_clauses = reduce(updated_assignments, clauses)
         return dpll(symbols, updated_assignments, reduced_clauses, recursion_depth+1)
     guess_symbol = next(symbol for symbol in symbols if get_assignment(symbol, updated_assignments) == None)
     guess_true = updated_assignments[0:guess_symbol-1] + [True] + updated_assignments[guess_symbol:]
     guess_false = updated_assignments[0:guess_symbol-1] + [False] + updated_assignments[guess_symbol:] 
-
     return dpll(symbols, guess_true, reduce(guess_true, clauses), recursion_depth+1) \
         or dpll(symbols, guess_false, reduce(guess_false, clauses), recursion_depth+1)
 
