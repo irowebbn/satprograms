@@ -1,0 +1,4 @@
+Log file format:
+name of file corresponds with name of corresponding cnf file
+Column 1: Recursion depth
+Column 2: number of clauses currently satisfied
