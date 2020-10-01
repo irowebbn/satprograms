@@ -86,8 +86,14 @@ def _find_unit_clauses(symbols, assignments, clauses):
     return unit_clause_symbols
 
 
-def dpll(symbols, assignments, clauses, recursion_depth):
+def dpll(symbols, assignments, clauses, recursion_depth, max_list):
     clauses_matched = len([clause for clause in clauses if len(clause) != 0 and type(clause[0]) == type(True)])
+    # Keep track of the maximum clauses satisfied 
+    # and maximum recursion depth reached
+    if clauses_matched > max_list[0]:
+        max_list[0] = clauses_matched
+    if recursion_depth > max_list[1]:
+        max_list[1] = recursion_depth
     print(str(recursion_depth) + ", " + str(clauses_matched))
     updated_assignments = copy.deepcopy(assignments)
     # Check if all clauses are already true
@@ -100,17 +106,17 @@ def dpll(symbols, assignments, clauses, recursion_depth):
     pure_symbols = _find_pure_symbols(symbols, updated_assignments, clauses)
     if len(pure_symbols) > 0:
         reduced_clauses = _reduce(updated_assignments, clauses)
-        return dpll(symbols, updated_assignments, reduced_clauses, recursion_depth+1)
+        return dpll(symbols, updated_assignments, reduced_clauses, recursion_depth+1, max_list)
     unit_clauses = _find_unit_clauses(symbols, updated_assignments, clauses)
     if len(unit_clauses) > 0:
         reduced_clauses = _reduce(updated_assignments, clauses)
-        return dpll(symbols, updated_assignments, reduced_clauses, recursion_depth+1)
+        return dpll(symbols, updated_assignments, reduced_clauses, recursion_depth+1, max_list)
     # Branch to try both the positive and negative assignment of the next unassigned symbol
     guess_symbol = next(symbol for symbol in symbols if _get_assignment(symbol, updated_assignments) == None)
     guess_true = updated_assignments[0:guess_symbol-1] + [True] + updated_assignments[guess_symbol:]
     guess_false = updated_assignments[0:guess_symbol-1] + [False] + updated_assignments[guess_symbol:] 
-    return dpll(symbols, guess_true, _reduce(guess_true, clauses), recursion_depth+1) \
-        or dpll(symbols, guess_false, _reduce(guess_false, clauses), recursion_depth+1)
+    return dpll(symbols, guess_true, _reduce(guess_true, clauses), recursion_depth+1, max_list) \
+        or dpll(symbols, guess_false, _reduce(guess_false, clauses), recursion_depth+1, max_list)
 
 # Provide a filename to log the recursion depth and clauses satisfied values
 # If not filename is provided, all logging is printed to stdout
@@ -128,7 +134,9 @@ if __name__ == "__main__":
     symbols = [i for i in range(1, nbvar+1)]
     assignments = [None] * nbvar
     clauses = [None] * nbclauses
-
+    max_recursion_depth = 0
+    max_clauses_sat = 0
+    max_list = [max_clauses_sat, max_recursion_depth]
     for i in range(nbclauses):
         user_input = input() 
         clauses[i] = [int(i) for i in user_input.split()[:-1]]
@@ -139,9 +147,13 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         f = open(sys.argv[1], 'w')
         sys.stdout = f
-    if(dpll(symbols, assignments, clauses, 0)):
+    if(dpll(symbols, assignments, clauses, 0, max_list)):
         sys.stdout = original_stdout
-        print("SATISFIABLE")
+        print(str(len(symbols)) + ", " + str(len(clauses)) +
+             ", SATISFIABLE, " + str(max_list[0]) + 
+             ", " + str(max_list[1]))
     else:
         sys.stdout = original_stdout
-        print("UNSATISFIABLE")
+        print(str(len(symbols)) + ", " + str(len(clauses)) + 
+            ", UNSATISFIABLE, " + str(max_list[0]) + 
+            ", " + str(max_list[1]))
