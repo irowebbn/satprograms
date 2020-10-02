@@ -1,8 +1,11 @@
 import sys
 import glob
+import random
 import multiprocessing
-import dpll
 import time
+
+import dpll
+import walk
 
 def get_input(filename):
     with open(filename , 'r') as file:
@@ -36,6 +39,7 @@ def run_dpll(formula):
         max_clauses_sat = 0
         max_list = [max_clauses_sat, max_recursion_depth]
         start_time = time.time()
+        
         if(dpll.dpll(symbols, assignments, clauses, 0, max_list)):
             duration = time.time() - start_time
             sys.stdout = original_stdout
@@ -49,12 +53,47 @@ def run_dpll(formula):
                 str(len(clauses)) + ", UNSATISFIABLE, " + str(max_list[0]) + 
                 ", " + str(max_list[1]) + ", " + str(duration))
 
+def run_walk(formula):
+    symbols, assignments, clauses = get_input(formula)
+
+    # Special thanks to Stack Abuse for teaching me the stdout swap technique
+    # Jacob Stopak, https://stackabuse.com/writing-to-a-file-with-pythons-print-function/
+    original_stdout = sys.stdout
+    if(len(sys.argv) > 3):
+        f = open(sys.argv[3], 'w')
+        sys.stdout = f
+    start_time = time.time()
+    sat, assignments, max_clauses, flips = walk.walk(symbols, clauses, p, max_flips)
+    duration = time.time() - start_time
+    if(sat):
+        sys.stdout = original_stdout
+        print(str(len(symbols)) + ", " + str(len(clauses)) +
+             ", SATISFIABLE, " + str(max_clauses) + 
+             ", " + str(flips) + ", " + str(duration))
+    else:
+        sys.stdout = original_stdout
+        print(str(len(symbols)) + ", " + str(len(clauses)) + 
+            ", CANNOT SATISFY IN MAX FLIPS, " + str(max_clauses) + 
+            ", " + str(flips) + ", " + str(duration) )
+
 if __name__ == '__main__':
+    RUN_DPLL = False
+    RUN_WALK = True
+
     if len(sys.argv) != 2:
         print("Usage: run.py dir")
         print("`dir/` should be a directory containing properly formatted .cnf formula files")
+        quit()
+
+    # Set random probability
+    p = 0.5
+    max_flips = 100000
 
     formulas_to_solve = glob.glob(sys.argv[1]+"/*.cnf")
     with multiprocessing.Pool() as pool:
-        pool.map(run_dpll, formulas_to_solve)
+        if RUN_DPLL:
+            pool.map(run_dpll, formulas_to_solve)
+        if RUN_WALK:
+            for _ in range(10):
+                pool.map(run_walk, formulas_to_solve)
     
