@@ -35,6 +35,7 @@ def walk(symbols, clauses, p, max_flips):
         _apply(clauses, ref_clauses, assignments)
         clause_status = [any(clause) for clause in clauses]
         clauses_matched = [status for status in clause_status if status == True]
+        print(str(i) + ", " + str(clauses_matched))
         if len(clauses_matched) > max_clauses_matched:
             max_clauses_matched = len(clauses_matched)
         # Check if satisfiability is reached
@@ -83,7 +84,7 @@ if __name__ == "__main__":
     for i in range(nbclauses):
         user_input = input() 
         clauses[i] = [int(i) for i in user_input.split()[:-1]]
-        
+
     # Set random probability
     p = float(sys.argv[1])
     max_flips = int(sys.argv[2])

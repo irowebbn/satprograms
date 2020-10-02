@@ -16,14 +16,14 @@ fig = plt.figure()
 #creating a subplot 
 ax1 = fig.add_subplot(1,1,1)
 
-data = open('100.410.309690489.log','r').read()
+data = open('uf20-0156.log','r').read()
 xs = []
 ys = []
 lines = data.splitlines()
 max_c = [0]
 max_rd = 0
-t1 = ax1.text(0, 390, "Max clauses satisfied: " + str(max_c),bbox=dict(facecolor='red', alpha=0.5))
-t2 = ax1.text(0, 340, "Recursion depth: 0\nClauses satisfied: 0", bbox=dict(facecolor='red', alpha=0.5))
+t1 = ax1.text(0, 70, "Max clauses satisfied: " + str(max_c),bbox=dict(facecolor='red', alpha=0.5))
+t2 = ax1.text(0, 50, "Recursion depth: 0\nClauses satisfied: 0", bbox=dict(facecolor='red', alpha=0.5))
 
 print("Reading data from file (this could take a while).")
 for line in lines:
@@ -32,7 +32,7 @@ for line in lines:
     ys.append(int(y))
         
 plt.xlabel('Recursion Depth')
-plt.ylabel('Clauses Match')
+plt.ylabel('Clauses Matched')
 plt.title('DPLL Solving Path')
 
 ax1.set_xlim(min(xs), max(xs))
@@ -41,9 +41,9 @@ ax1.set_ylim(min(ys), max(ys))
 def animate(i, max_c):
     if ys[i] > max_c[0]:
         max_c[0] = ys[i]
-    t1.set_text("Max clauses satisfied: " + str(max_c[0]) + "/410" )
-    t2.set_text("Recursion depth: " +  str(xs[i+1]) +
-        "\nClauses satisfied: " + str(ys[i+1]))
+    t1.set_text("Max clauses satisfied: " + str(max_c[0]) + "/91" )
+    t2.set_text("Recursion depth: " +  str(xs[i]) +
+        "\nClauses satisfied: " + str(ys[i]))
     if(i > 1):
         for line in ax1.lines:
             alpha = line.get_alpha()
@@ -52,4 +52,5 @@ def animate(i, max_c):
         ax1.plot(xs[i-1:i+1], ys[i-1:i+1], 'bo-', alpha = 1)
     return t1, t2
 ani = animation.FuncAnimation(fig, animate, fargs=(max_c,), frames=len(xs), interval=1) 
+#plt.show()
 ani.save('dpll_sat_example.mp4', writer=writer)
