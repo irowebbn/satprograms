@@ -36,7 +36,7 @@ def run_dpll(formula):
      # Special thanks to Stack Abuse for teaching me the stdout swap technique
     # Jacob Stopak, https://stackabuse.com/writing-to-a-file-with-pythons-print-function/
     original_stdout = sys.stdout
-    with open("./logs/"+str(formula)[:-4]+".log" , 'w') as log:
+    with open("./logs/dpll/"+str(formula).split("/")[-1][:-4]+".log" , 'w') as log:
         sys.stdout = log
         max_recursion_depth = 0
         max_clauses_sat = 0
@@ -63,22 +63,21 @@ def run_walk(formula):
     # Special thanks to Stack Abuse for teaching me the stdout swap technique
     # Jacob Stopak, https://stackabuse.com/writing-to-a-file-with-pythons-print-function/
     original_stdout = sys.stdout
-    if(len(sys.argv) > 3):
-        f = open(sys.argv[3], 'w')
-        sys.stdout = f
-    start_time = time.time()
-    sat, assignments, max_clauses, flips = walk.walk(symbols, clauses, p, max_flips)
-    duration = time.time() - start_time
-    if(sat):
-        sys.stdout = original_stdout
-        print(str(formula) + ", " + str(len(symbols)) + ", " + str(len(clauses)) +
-             ", SATISFIABLE, " + str(max_clauses) + 
-             ", " + str(flips) + ", " + str(duration))
-    else:
-        sys.stdout = original_stdout
-        print(str(formula) + ", " + str(len(symbols)) + ", " + str(len(clauses)) + 
-            ", CANNOT SATISFY IN MAX FLIPS, " + str(max_clauses) + 
-            ", " + str(flips) + ", " + str(duration) )
+    with open("./logs/walk/"+str(formula).split("/")[-1][:-4]+".log" , 'w') as log:
+        sys.stdout = log
+        start_time = time.time()
+        sat, assignments, max_clauses, flips = walk.walk(symbols, clauses, p, max_flips)
+        duration = time.time() - start_time
+        if(sat):
+            sys.stdout = original_stdout
+            print(str(formula) + ", " + str(len(symbols)) + ", " + str(len(clauses)) +
+                ", SATISFIABLE, " + str(max_clauses) + 
+                ", " + str(flips) + ", " + str(duration))
+        else:
+            sys.stdout = original_stdout
+            print(str(formula) + ", " + str(len(symbols)) + ", " + str(len(clauses)) + 
+                ", CANNOT SATISFY IN MAX FLIPS, " + str(max_clauses) + 
+                ", " + str(flips) + ", " + str(duration) )
 
 # Test driver for Simulated Annealing
 def run_sa(formula):
@@ -87,22 +86,21 @@ def run_sa(formula):
     # Special thanks to Stack Abuse for teaching me the stdout swap technique
     # Jacob Stopak, https://stackabuse.com/writing-to-a-file-with-pythons-print-function/
     original_stdout = sys.stdout
-    if(len(sys.argv) > 3):
-        f = open(sys.argv[3], 'w')
-        sys.stdout = f
-    start_time = time.time()
-    sat, assignments, max_clauses, flips = sa.sa(symbols, clauses, max_flips, cool_rate)
-    duration = time.time() - start_time
-    if(sat):
-        sys.stdout = original_stdout
-        print(str(formula) + ", " + str(len(symbols)) + ", " + str(len(clauses)) +
-             ", SATISFIABLE, " + str(max_clauses) + 
-             ", " + str(flips) + ", " + str(duration))
-    else:
-        sys.stdout = original_stdout
-        print(str(formula) + ", " + str(len(symbols)) + ", " + str(len(clauses)) + 
-            ", CANNOT SATISFY IN MAX FLIPS, " + str(max_clauses) + 
-            ", " + str(flips) + ", " + str(duration) )
+    with open("./logs/sa/"+str(formula).split("/")[-1][:-4]+".log" , 'w') as log:
+        sys.stdout = log
+        start_time = time.time()
+        sat, assignments, max_clauses, flips = sa.sa(symbols, clauses, max_flips, cool_rate)
+        duration = time.time() - start_time
+        if(sat):
+            sys.stdout = original_stdout
+            print(str(formula) + ", " + str(len(symbols)) + ", " + str(len(clauses)) +
+                ", SATISFIABLE, " + str(max_clauses) + 
+                ", " + str(flips) + ", " + str(duration))
+        else:
+            sys.stdout = original_stdout
+            print(str(formula) + ", " + str(len(symbols)) + ", " + str(len(clauses)) + 
+                ", CANNOT SATISFY IN MAX FLIPS, " + str(max_clauses) + 
+                ", " + str(flips) + ", " + str(duration) )
 
 # Main test driver
 if __name__ == '__main__':
