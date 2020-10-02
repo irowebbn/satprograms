@@ -67,12 +67,12 @@ def run_walk(formula):
     duration = time.time() - start_time
     if(sat):
         sys.stdout = original_stdout
-        print(str(len(symbols)) + ", " + str(len(clauses)) +
+        print(str(formula) + ", " + str(len(symbols)) + ", " + str(len(clauses)) +
              ", SATISFIABLE, " + str(max_clauses) + 
              ", " + str(flips) + ", " + str(duration))
     else:
         sys.stdout = original_stdout
-        print(str(len(symbols)) + ", " + str(len(clauses)) + 
+        print(str(formula) + ", " + str(len(symbols)) + ", " + str(len(clauses)) + 
             ", CANNOT SATISFY IN MAX FLIPS, " + str(max_clauses) + 
             ", " + str(flips) + ", " + str(duration) )
 
