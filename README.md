@@ -1,3 +1,11 @@
+SAT Programs
+CS 463G Artificial Intelligence
+University of Kentucky Fall 2020
+
+From assignment: "This assignment uses several heuristic search techniques to
+find possibly optimal truth assignments for variables in the given Boolean
+formulas"
+
 # README
 If you want to save a lot of computation, analysis of results obtained from
 running all the formulas in `test` have been placed in the `results` directory.
