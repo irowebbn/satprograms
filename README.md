@@ -1,5 +1,7 @@
 SAT Programs
+
 CS 463G Artificial Intelligence
+
 University of Kentucky Fall 2020
 
 From assignment: "This assignment uses several heuristic search techniques to
